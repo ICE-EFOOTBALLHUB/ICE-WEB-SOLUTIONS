@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICE Web Solutions — Web systems for UK small businesses</title>
+<meta name="description" content="ICE Web Solutions builds booking systems, live ordering, and admin dashboards for UK small businesses — real working software, not template sites.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="wrap nav__inner">
+    <a href="#top" class="nav__brand">
+      <img src="images/logo.png" alt="ICE Web Solutions" class="nav__logo">
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#work">Work</a>
+      <a href="#services">Services</a>
+      <a href="#process">How it works</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="https://wa.me/2349167405659" class="btn btn--sm" target="_blank" rel="noopener">Start a project</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow">Web systems for UK small businesses</p>
+        <h1 class="hero__title">We build the parts of a website<br>that actually run your business.</h1>
+        <p class="hero__sub">Booking calendars, live ordering, admin dashboards, real-time chat — the working software behind the page, not just the page. Built and shipped by one developer, so what you approve is what gets built.</p>
+        <div class="hero__actions">
+          <a href="#work" class="btn btn--primary">See the work</a>
+          <a href="https://wa.me/2349167405659" class="btn btn--ghost" target="_blank" rel="noopener">Message on WhatsApp</a>
+        </div>
+      </div>
+
+      <div class="console" role="img" aria-label="Live systems status console showing booking engine, live chat, admin auth and order tracking as online">
+        <div class="console__bar">
+          <span class="console__dot console__dot--r"></span>
+          <span class="console__dot console__dot--y"></span>
+          <span class="console__dot console__dot--g"></span>
+          <span class="console__bar-label">system-status.log</span>
+        </div>
+        <ul class="console__list">
+          <li><span class="pulse"></span> BOOKING ENGINE <span class="console__state">· ONLINE</span></li>
+          <li><span class="pulse"></span> LIVE CHAT (onSnapshot) <span class="console__state">· ONLINE</span></li>
+          <li><span class="pulse"></span> ADMIN AUTH <span class="console__state">· SECURED</span></li>
+          <li><span class="pulse"></span> ORDER TRACKING <span class="console__state">· ONLINE</span></li>
+          <li><span class="pulse pulse--dim"></span> RESTAURANT MODULE <span class="console__state console__state--dim">· IN BUILD</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services" id="services">
+    <div class="wrap">
+      <p class="eyebrow">What I build</p>
+      <h2 class="section__title">Six ways a website earns its keep</h2>
+
+      <div class="grid grid--3">
+        <article class="card">
+          <span class="card__idx">01</span>
+          <h3>Business websites</h3>
+          <p>A site that builds trust fast and turns visitors into enquiries — not a digital business card.</p>
+        </article>
+        <article class="card">
+          <span class="card__idx">02</span>
+          <h3>Booking systems</h3>
+          <p>Customers book appointments or tables straight from the site, 24/7, with live availability — no phone tag.</p>
+        </article>
+        <article class="card">
+          <span class="card__idx">03</span>
+          <h3>Ordering &amp; menus</h3>
+          <p>Digital menus with real-time stock and sold-out toggles, order status tracking, and WhatsApp handoff for delivery.</p>
+        </article>
+        <article class="card">
+          <span class="card__idx">04</span>
+          <h3>Admin dashboards</h3>
+          <p>One login to manage bookings, orders, prices and content — changes appear on the live site instantly.</p>
+        </article>
+        <article class="card">
+          <span class="card__idx">05</span>
+          <h3>Live chat &amp; broadcasts</h3>
+          <p>Real-time messaging between you and customers, and one-to-many broadcast announcements when you need them.</p>
+        </article>
+        <article class="card">
+          <span class="card__idx">06</span>
+          <h3>Landing pages &amp; forms</h3>
+          <p>Focused pages for a single offer, with contact forms that route leads straight to your inbox.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="work" id="work">
+    <div class="wrap">
+      <p class="eyebrow">Some of the work</p>
+      <h2 class="section__title">Live systems, not mockups</h2>
+      <p class="section__sub">Every project below runs on a real database, real auth, and a real admin panel — the same stack I'll build for your business.</p>
+
+      <div class="projects" id="projects">
+        <!-- injected by js/projects.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS / WHY -->
+  <section class="why" id="process">
+    <div class="wrap">
+      <p class="eyebrow">Why work with me</p>
+      <h2 class="section__title">Built to run, not just to look good</h2>
+
+      <div class="grid grid--2">
+        <div class="why__item">
+          <h3>Fast &amp; reliable</h3>
+          <p>Lightweight, no bloated frameworks — pages load quickly and hold up under real traffic.</p>
+        </div>
+        <div class="why__item">
+          <h3>Mobile-first</h3>
+          <p>Most of your customers will land on a phone. Every build is designed there first.</p>
+        </div>
+        <div class="why__item">
+          <h3>Secure by default</h3>
+          <p>Auth-gated admin panels and locked-down data rules — your dashboard isn't guessable.</p>
+        </div>
+        <div class="why__item">
+          <h3>One developer, one thread</h3>
+          <p>No handoffs between departments. You talk to the person who writes the code.</p>
+        </div>
+        <div class="why__item">
+          <h3>Clear payment terms</h3>
+          <p>A deposit secures the build; final delivery and hosting access hand over once it's settled — no surprises either side.</p>
+        </div>
+        <div class="why__item">
+          <h3>Support after launch</h3>
+          <p>Sites ship with room to grow — new services, new pages, new features — without a rebuild.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="wrap contact__inner">
+      <div>
+        <p class="eyebrow">Get in touch</p>
+        <h2 class="section__title">Tell me about the business —<br>I'll tell you what it needs.</h2>
+        <p class="section__sub">Free audit of your current site included: what's costing you enquiries, and what fixing it would take.</p>
+        <div class="hero__actions">
+          <a href="https://wa.me/2349167405659" class="btn btn--primary" target="_blank" rel="noopener">WhatsApp: +234 916 740 5659</a>
+          <a href="mailto:icewebs.devs@gmail.com" class="btn btn--ghost">icewebs.devs@gmail.com</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <img src="images/logo.png" alt="ICE Web Solutions" class="footer__logo">
+    <p>Remote — serving UK small businesses.</p>
+    <p class="footer__copy">© <span id="year"></span> ICE Web Solutions.</p>
+  </div>
+</footer>
+
+<script src="js/projects.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
