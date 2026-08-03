@@ -1,20 +1,20 @@
 /* ============ TOKENS ============ */
 :root {
-  --bg: #070B12;
-  --bg-elevated: #0D141F;
-  --bg-card: #0B121C;
-  --line: rgba(111, 216, 255, 0.14);
-  --line-strong: rgba(111, 216, 255, 0.28);
+  --bg: #FFFFFF;
+  --bg-elevated: #F4F7FB;
+  --bg-card: #FFFFFF;
+  --line: rgba(46, 143, 255, 0.16);
+  --line-strong: rgba(46, 143, 255, 0.32);
 
   --blue: #2E8FFF;
-  --blue-bright: #6FD8FF;
-  --green: #3CF2A0;
-  --red: #FF5C5C;
-  --yellow: #FFC24B;
+  --blue-bright: #1A6FE0;
+  --green: #1FA971;
+  --red: #E23C3C;
+  --yellow: #C98A1F;
 
-  --text: #EAF2FF;
-  --text-dim: #8CA0BF;
-  --text-faint: #56698A;
+  --text: #0B121C;
+  --text-dim: #4B5A73;
+  --text-faint: #7C8AA3;
 
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
