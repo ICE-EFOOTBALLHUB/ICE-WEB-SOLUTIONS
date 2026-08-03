@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leads Inbox | ICE Web Solutions Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070B12; --bg-elevated:#0D141F; --bg-card:#0B121C;
+  --line:rgba(111,216,255,0.14); --line-strong:rgba(111,216,255,0.28);
+  --blue:#2E8FFF; --blue-bright:#6FD8FF; --green:#3CF2A0;
+  --text:#EAF2FF; --text-dim:#8CA0BF; --text-faint:#56698A;
+  --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:var(--font-body);color:var(--text);display:flex;flex-direction:column;overflow:hidden;position:fixed;inset:0;-webkit-font-smoothing:antialiased;}
+
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.navbar img{height:26px;}
+.page-title{font-family:var(--font-display);font-size:19px;font-weight:600;color:var(--blue-bright);padding:14px 18px 10px;flex-shrink:0;}
+.unread-total{background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;margin-left:8px;font-family:var(--font-mono);}
+
+.layout{display:flex;flex:1;overflow:hidden;}
+
+.sidebar{width:300px;border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-header{padding:12px 14px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--text-dim);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em;}
+.chat-list{overflow-y:auto;flex:1;}
+.chat-item{padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s;}
+.chat-item:hover{background:var(--bg-card);}
+.chat-item.active{background:var(--bg-card);border-left:3px solid var(--blue);}
+.chat-item-name{font-weight:600;font-size:14px;font-family:var(--font-display);}
+.chat-item-biz{font-size:11.5px;color:var(--blue-bright);margin-top:1px;}
+.chat-item-preview{font-size:12.5px;color:var(--text-dim);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-item-time{font-size:11px;color:var(--text-faint);margin-top:6px;font-family:var(--font-mono);}
+.unread-badge{background:var(--blue);color:#fff;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:100px;float:right;}
+
+.chat-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.no-chat-selected{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--text-faint);}
+.no-chat-selected .icon{font-size:46px;}
+
+.chat-top{background:var(--bg-elevated);border-bottom:1px solid var(--line);padding:14px 18px;flex-shrink:0;}
+.chat-top-name{font-weight:600;font-size:15px;color:var(--blue-bright);font-family:var(--font-display);}
+.chat-top-biz{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+.bubble-row{display:flex;align-items:flex-end;gap:8px;}
+.bubble-row.admin-row{flex-direction:row-reverse;}
+.bubble{max-width:70%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;}
+.bubble.lead-bubble{background:var(--bg-card);border:1px solid var(--line);border-bottom-left-radius:4px;}
+.bubble.admin-bubble{background:linear-gradient(135deg,var(--blue),#1A6FE0);color:#fff;border-bottom-right-radius:4px;}
+.bubble-time{font-size:10px;opacity:.65;margin-top:4px;display:block;}
+.bubble.admin-bubble .bubble-time{text-align:right;}
+.sys-msg{text-align:center;font-size:12px;color:var(--text-faint);padding:4px 0;font-family:var(--font-mono);}
+
+.input-area{padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;}
+.msg-input{flex:1;background:var(--bg-elevated);border:1.5px solid var(--line-strong);border-radius:20px;padding:10px 16px;color:var(--text);font-size:14px;resize:none;outline:none;max-height:120px;font-family:var(--font-body);}
+.msg-input:focus{border-color:var(--blue-bright);}
+.send-btn{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#1A6FE0);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.send-btn svg{width:18px;height:18px;fill:#fff;}
+
+#loadingScreen{position:fixed;inset:0;background:var(--bg);display:flex;justify-content:center;align-items:center;z-index:9999;}
+.spinner{width:40px;height:40px;border:4px solid var(--line);border-top:4px solid var(--blue-bright);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:640px){
+  .sidebar{width:100%;}
+  .chat-panel{display:none;}
+  .layout.chat-open .sidebar{display:none;}
+  .layout.chat-open .chat-panel{display:flex;width:100%;}
+  .chat-top{cursor:pointer;}
+}
+</style>
+</head>
+<body>
+
+<div id="loadingScreen"><div class="spinner"></div></div>
+
+<div class="navbar">
+  <a href="index.html"><img src="images/logo.png" alt="ICE Web Solutions"></a>
+</div>
+<div class="page-title">Leads Inbox <span id="totalUnreadBadge"></span></div>
+
+<div class="layout" id="layout">
+  <div class="sidebar">
+    <div class="sidebar-header">All conversations</div>
+    <div class="chat-list" id="chatList">
+      <div style="padding:30px;text-align:center;color:var(--text-faint);font-size:13px;">Loading...</div>
+    </div>
+  </div>
+
+  <div class="chat-panel" id="chatPanel">
+    <div class="no-chat-selected" id="noChatSelected">
+      <div class="icon">💬</div>
+      <p>Select a conversation to reply</p>
+    </div>
+
+    <div id="activeChatArea" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+      <div class="chat-top" id="chatTop" onclick="backToList()">
+        <div class="chat-top-name" id="activeChatName"></div>
+        <div class="chat-top-biz" id="activeChatBiz"></div>
+      </div>
+      <div class="messages" id="messagesContainer"></div>
+      <div class="input-area">
+        <textarea class="msg-input" id="msgInput" placeholder="Reply..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" onclick="sendReply()">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getFirestore, collection, doc, addDoc, query, orderBy, onSnapshot,
+         serverTimestamp, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAkkZpc1Oza-I_4UA4NfZuNCJMpKKi-2wA",
+  authDomain: "ice-efootballhub2.firebaseapp.com",
+  projectId: "ice-efootballhub2",
+  storageBucket: "ice-efootballhub2.firebasestorage.app",
+  messagingSenderId: "751764862704",
+  appId: "1:751764862704:web:2929386b5e5e50e5457435"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+const COLLECTION = "portfolioChats";
+
+let adminUser     = null;
+let activeChatId  = null;
+let unsubMessages = null;
+let typingTimeout = null;
+
+const chatListEl     = document.getElementById("chatList");
+const messagesEl     = document.getElementById("messagesContainer");
+const activeChatArea = document.getElementById("activeChatArea");
+const noChatSel      = document.getElementById("noChatSelected");
+
+window.autoResize = function(el){ el.style.height="auto"; el.style.height=Math.min(el.scrollHeight,120)+"px"; };
+window.handleKey  = function(e){ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendReply(); } };
+
+function formatTime(ts){
+  if(!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const today = new Date();
+  if(d.toDateString()===today.toDateString()) return d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  return d.toLocaleDateString([],{month:"short",day:"numeric"});
+}
+function formatDateDivider(ts){
+  if(!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const today=new Date(); const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1);
+  if(d.toDateString()===today.toDateString()) return "Today";
+  if(d.toDateString()===yesterday.toDateString()) return "Yesterday";
+  return d.toLocaleDateString([],{weekday:"long",month:"short",day:"numeric"});
+}
+function escapeHtml(str){ return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>"); }
+function scrollToBottom(){ messagesEl.scrollTo({top:messagesEl.scrollHeight,behavior:"smooth"}); }
+
+window.backToList = function(){
+  if(window.innerWidth>640) return;
+  document.getElementById("layout").classList.remove("chat-open");
+};
+
+function listenAllChats(){
+  const q = query(collection(db, COLLECTION), orderBy("lastAt","desc"));
+  onSnapshot(q,(snap)=>{
+    chatListEl.innerHTML = "";
+    let totalUnread = 0;
+    snap.forEach(docSnap=>{
+      const data = docSnap.data();
+      const uid  = docSnap.id;
+      totalUnread += (data.adminUnread||0);
+
+      const item = document.createElement("div");
+      item.className = "chat-item" + (uid===activeChatId ? " active" : "");
+      item.onclick = () => openChat(uid, data, item);
+
+      item.innerHTML = `
+        ${data.adminUnread>0 ? `<span class="unread-badge">${data.adminUnread}</span>`:""}
+        <div class="chat-item-name">${escapeHtml(data.name||"Unknown")}</div>
+        ${data.business ? `<div class="chat-item-biz">${escapeHtml(data.business)}</div>` : ""}
+        <div class="chat-item-preview">${escapeHtml(data.lastMessage||"No messages yet")}</div>
+        <div class="chat-item-time">${formatTime(data.lastAt)}</div>
+      `;
+      chatListEl.appendChild(item);
+    });
+
+    if(snap.empty){
+      chatListEl.innerHTML = `<div style="padding:30px;text-align:center;color:var(--text-faint);font-size:13px;">No leads yet</div>`;
+    }
+
+    const badge = document.getElementById("totalUnreadBadge");
+    badge.textContent = totalUnread>0 ? totalUnread : "";
+  });
+}
+
+window.openChat = function(uid, data, itemEl){
+  activeChatId = uid;
+  document.querySelectorAll(".chat-item").forEach(el=>el.classList.remove("active"));
+  if(itemEl) itemEl.classList.add("active");
+
+  noChatSel.style.display = "none";
+  activeChatArea.style.display = "flex";
+
+  document.getElementById("activeChatName").textContent = data.name || uid;
+  document.getElementById("activeChatBiz").textContent  = data.business || "";
+
+  document.getElementById("layout").classList.add("chat-open");
+
+  if(unsubMessages) unsubMessages();
+  messagesEl.innerHTML = "";
+  let lastDateStr = "";
+
+  const q = query(collection(db, COLLECTION, uid, "messages"), orderBy("createdAt","asc"));
+  unsubMessages = onSnapshot(q,(snap)=>{
+    snap.docChanges().forEach(change=>{
+      if(change.type==="added"){
+        const msg = change.doc.data();
+        const id  = change.doc.id;
+
+        if(msg.createdAt){
+          const ds = formatDateDivider(msg.createdAt);
+          if(ds!==lastDateStr){
+            lastDateStr = ds;
+            const div = document.createElement("div");
+            div.className="sys-msg"; div.textContent=ds;
+            messagesEl.appendChild(div);
+          }
+        }
+
+        if(!messagesEl.querySelector(`[data-id="${id}"]`)){
+          const isAdmin = msg.senderRole==="admin";
+          const row = document.createElement("div");
+          row.className = "bubble-row " + (isAdmin?"admin-row":"");
+          row.dataset.id = id;
+          row.innerHTML = `
+            <div class="bubble ${isAdmin?"admin-bubble":"lead-bubble"}">
+              ${escapeHtml(msg.text)}
+              <span class="bubble-time">${formatTime(msg.createdAt)}</span>
+            </div>
+          `;
+          messagesEl.appendChild(row);
+        }
+      }
+    });
+    scrollToBottom();
+    updateDoc(doc(db, COLLECTION, uid), { adminUnread: 0 }).catch(()=>{});
+  });
+};
+
+window.sendReply = async function(){
+  const input = document.getElementById("msgInput");
+  const text  = input.value.trim();
+  if(!text || !activeChatId) return;
+
+  input.value = ""; input.style.height = "auto";
+  await updateDoc(doc(db, COLLECTION, activeChatId), { adminTyping: false }).catch(()=>{});
+
+  try{
+    await addDoc(collection(db, COLLECTION, activeChatId, "messages"), {
+      text, senderUid: adminUser.uid, senderRole: "admin", createdAt: serverTimestamp()
+    });
+    await updateDoc(doc(db, COLLECTION, activeChatId), {
+      lastMessage: text, lastAt: serverTimestamp(), leadUnread: 1, adminTyping: false
+    });
+  }catch(e){ alert("Failed to send: "+e.message); }
+};
+
+document.getElementById("msgInput").addEventListener("input", ()=>{
+  if(!activeChatId) return;
+  updateDoc(doc(db, COLLECTION, activeChatId), { adminTyping: true }).catch(()=>{});
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(()=>{
+    updateDoc(doc(db, COLLECTION, activeChatId), { adminTyping: false }).catch(()=>{});
+  }, 2500);
+});
+
+// Same admin check as the eFootballHub admin panel — reuses the "admins" collection.
+onAuthStateChanged(auth, async (user)=>{
+  document.getElementById("loadingScreen").style.display = "none";
+  if(!user){ window.location.href = "login.html"; return; }
+
+  const adminSnap = await getDocs(query(collection(db,"admins"), where("email","==",user.email)));
+  if(adminSnap.empty){ alert("Access denied."); window.location.href="index.html"; return; }
+
+  adminUser = user;
+  listenAllChats();
+});
+</script>
+</body>
+</html>
