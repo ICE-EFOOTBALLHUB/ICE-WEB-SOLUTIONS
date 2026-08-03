@@ -327,11 +327,20 @@ window.submitPin = async function(){
   pinSubmit.disabled = true;
   pinSubmit.textContent = "Checking...";
 
+  const timeout = (ms) => new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("timeout")), ms)
+  );
+
   try{
-    await signInWithEmailAndPassword(auth, ADMIN_EMAIL, pin);
+    await Promise.race([
+      signInWithEmailAndPassword(auth, ADMIN_EMAIL, pin),
+      timeout(12000)
+    ]);
     // onAuthStateChanged picks it up from here
   }catch(e){
-    pinError.textContent = "Incorrect PIN.";
+    pinError.textContent = (e.message === "timeout")
+      ? "Network too slow. Check your connection and try again."
+      : "Incorrect PIN.";
     pinInput.value = "";
     pinInput.focus();
     pinSubmit.disabled = false;
@@ -353,7 +362,25 @@ onAuthStateChanged(auth, async (user)=>{
     return;
   }
 
-  const adminSnap = await getDocs(query(collection(db,"admins"), where("email","==",user.email)));
+  const timeout = (ms) => new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("timeout")), ms)
+  );
+
+  let adminSnap;
+  try{
+    adminSnap = await Promise.race([
+      getDocs(query(collection(db,"admins"), where("email","==",user.email))),
+      timeout(12000)
+    ]);
+  }catch(e){
+    pinError.textContent = (e.message === "timeout")
+      ? "Connection issue verifying access. Try again."
+      : "Couldn't verify access: " + e.message;
+    pinSubmit.disabled = false;
+    pinSubmit.textContent = "Unlock";
+    return;
+  }
+
   if(adminSnap.empty){ alert("Access denied."); window.location.href="index.html"; return; }
 
   pinGate.style.display = "none";
