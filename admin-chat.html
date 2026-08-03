@@ -8,10 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#070B12; --bg-elevated:#0D141F; --bg-card:#0B121C;
-  --line:rgba(111,216,255,0.14); --line-strong:rgba(111,216,255,0.28);
-  --blue:#2E8FFF; --blue-bright:#6FD8FF; --green:#3CF2A0;
-  --text:#EAF2FF; --text-dim:#8CA0BF; --text-faint:#56698A;
+  --bg:#FFFFFF; --bg-elevated:#F4F7FB; --bg-card:#FFFFFF;
+  --line:rgba(46,143,255,0.16); --line-strong:rgba(46,143,255,0.32);
+  --blue:#2E8FFF; --blue-bright:#1A6FE0; --green:#1FA971;
+  --text:#0B121C; --text-dim:#4B5A73; --text-faint:#7C8AA3;
   --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'IBM Plex Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -64,6 +64,16 @@ body{background:var(--bg);font-family:var(--font-body);color:var(--text);display
 .spinner{width:40px;height:40px;border:4px solid var(--line);border-top:4px solid var(--blue-bright);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
+#pinGate{position:fixed;inset:0;background:var(--bg);display:none;justify-content:center;align-items:center;z-index:10000;flex-direction:column;gap:18px;}
+.pin-card{background:var(--bg-card);border:1px solid var(--line-strong);border-radius:16px;padding:32px 28px;width:min(320px,90vw);text-align:center;}
+.pin-card h2{font-family:var(--font-display);font-size:17px;color:var(--blue-bright);margin-bottom:6px;}
+.pin-card p{font-size:12.5px;color:var(--text-dim);margin-bottom:20px;}
+.pin-dots-input{width:100%;background:var(--bg-elevated);border:1.5px solid var(--line-strong);border-radius:10px;padding:14px;color:var(--text);font-size:22px;letter-spacing:10px;text-align:center;font-family:var(--font-mono);outline:none;}
+.pin-dots-input:focus{border-color:var(--blue-bright);}
+.pin-error{font-size:12px;color:#FF6B6B;margin-top:12px;min-height:16px;font-family:var(--font-mono);}
+.pin-submit{margin-top:16px;width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),#1A6FE0);color:#fff;font-weight:600;font-size:14px;cursor:pointer;font-family:var(--font-body);}
+.pin-submit:disabled{opacity:.6;cursor:default;}
+
 @media(max-width:640px){
   .sidebar{width:100%;}
   .chat-panel{display:none;}
@@ -76,6 +86,16 @@ body{background:var(--bg);font-family:var(--font-body);color:var(--text);display
 <body>
 
 <div id="loadingScreen"><div class="spinner"></div></div>
+
+<div id="pinGate">
+  <div class="pin-card">
+    <h2>Admin access</h2>
+    <p>Enter your 6-digit PIN</p>
+    <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="pin-dots-input" id="pinInput" autocomplete="off">
+    <button class="pin-submit" id="pinSubmitBtn" onclick="submitPin()">Unlock</button>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+</div>
 
 <div class="navbar">
   <a href="index.html"><img src="images/logo.png" alt="ICE Web Solutions"></a>
@@ -114,7 +134,7 @@ body{background:var(--bg);font-family:var(--font-body);color:var(--text);display
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 import { getFirestore, collection, doc, addDoc, query, orderBy, onSnapshot,
          serverTimestamp, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
@@ -131,7 +151,13 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-const COLLECTION = "portfolioChats";
+const COLLECTION  = "portfolioChats";
+const ADMIN_EMAIL = "icewebsolutions@ice.com";
+
+const pinGate    = document.getElementById("pinGate");
+const pinInput   = document.getElementById("pinInput");
+const pinError   = document.getElementById("pinError");
+const pinSubmit  = document.getElementById("pinSubmitBtn");
 
 let adminUser     = null;
 let activeChatId  = null;
@@ -283,14 +309,48 @@ document.getElementById("msgInput").addEventListener("input", ()=>{
   }, 2500);
 });
 
+window.submitPin = async function(){
+  const pin = pinInput.value.trim();
+  pinError.textContent = "";
+
+  if(!/^\d{6}$/.test(pin)){
+    pinError.textContent = "Enter all 6 digits.";
+    return;
+  }
+
+  pinSubmit.disabled = true;
+  pinSubmit.textContent = "Checking...";
+
+  try{
+    await signInWithEmailAndPassword(auth, ADMIN_EMAIL, pin);
+    // onAuthStateChanged picks it up from here
+  }catch(e){
+    pinError.textContent = "Incorrect PIN.";
+    pinInput.value = "";
+    pinInput.focus();
+    pinSubmit.disabled = false;
+    pinSubmit.textContent = "Unlock";
+  }
+};
+
+pinInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") submitPin(); });
+pinInput.addEventListener("input",()=>{ pinInput.value = pinInput.value.replace(/\D/g,"").slice(0,6); });
+
 // Same admin check as the eFootballHub admin panel — reuses the "admins" collection.
 onAuthStateChanged(auth, async (user)=>{
   document.getElementById("loadingScreen").style.display = "none";
-  if(!user){ window.location.href = "login.html"; return; }
+
+  if(!user){
+    pinGate.style.display = "flex";
+    pinInput.value = "";
+    pinInput.focus();
+    return;
+  }
 
   const adminSnap = await getDocs(query(collection(db,"admins"), where("email","==",user.email)));
   if(adminSnap.empty){ alert("Access denied."); window.location.href="index.html"; return; }
 
+  pinGate.style.display = "none";
   adminUser = user;
   listenAllChats();
 });
