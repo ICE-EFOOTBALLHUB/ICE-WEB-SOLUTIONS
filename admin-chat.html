@@ -225,6 +225,9 @@ function listenAllChats(){
 
     const badge = document.getElementById("totalUnreadBadge");
     badge.textContent = totalUnread>0 ? totalUnread : "";
+  }, (err) => {
+    console.error("listenAllChats error:", err);
+    chatListEl.innerHTML = `<div style="padding:30px;text-align:center;color:#FF6B6B;font-size:13px;">Couldn't load leads: ${escapeHtml(err.message)}</div>`;
   });
 }
 
@@ -279,6 +282,9 @@ window.openChat = function(uid, data, itemEl){
     });
     scrollToBottom();
     updateDoc(doc(db, COLLECTION, uid), { adminUnread: 0 }).catch(()=>{});
+  }, (err) => {
+    console.error("openChat messages error:", err);
+    messagesEl.innerHTML = `<div style="padding:20px;text-align:center;color:#FF6B6B;font-size:13px;">Couldn't load this conversation: ${escapeHtml(err.message)}</div>`;
   });
 };
 

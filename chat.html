@@ -282,6 +282,12 @@ function listenMessages() {
     scrollToBottom(!initialLoad);
     initialLoad = false;
     updateDoc(doc(db, COLLECTION, chatId), { leadUnread: 0 }).catch(() => {});
+  }, (err) => {
+    console.error("listenMessages error:", err);
+    if (emptyState) {
+      emptyState.style.display = "block";
+      emptyState.innerHTML = `<div class="icon">⚠️</div><p>Couldn't load messages. Please refresh the page.</p>`;
+    }
   });
 }
 
@@ -370,6 +376,23 @@ document.getElementById("gateForm").addEventListener("submit", async (e) => {
   localStorage.setItem("icews_leadName", leadName);
   localStorage.setItem("icews_leadBusiness", leadBusiness);
 
+  const ok = await enterChat();
+  if (!ok) {
+    alert("Couldn't connect. Please check your connection and try again.");
+    btn.disabled = false;
+    btn.textContent = "Start chatting";
+  }
+});
+
+// Pre-fill from a previous visit (used as a fallback if auto-entry below fails)
+window.addEventListener("DOMContentLoaded", () => {
+  const savedName = localStorage.getItem("icews_leadName");
+  const savedBiz  = localStorage.getItem("icews_leadBusiness");
+  if (savedName) document.getElementById("leadName").value = savedName;
+  if (savedBiz)  document.getElementById("leadBusiness").value = savedBiz;
+});
+
+async function enterChat() {
   try {
     if (!currentUser) {
       const cred = await signInAnonymously(auth);
@@ -381,25 +404,33 @@ document.getElementById("gateForm").addEventListener("submit", async (e) => {
     listenMessages();
     listenTyping();
     input.focus();
+    return true;
   } catch (err) {
-    alert("Couldn't connect: " + err.message);
-    btn.disabled = false;
-    btn.textContent = "Start chatting";
+    console.error("enterChat failed:", err);
+    return false;
   }
-});
-
-// Pre-fill from a previous visit
-window.addEventListener("DOMContentLoaded", () => {
-  const savedName = localStorage.getItem("icews_leadName");
-  const savedBiz  = localStorage.getItem("icews_leadBusiness");
-  if (savedName) document.getElementById("leadName").value = savedName;
-  if (savedBiz)  document.getElementById("leadBusiness").value = savedBiz;
-});
+}
 
 // ── Boot ──
-onAuthStateChanged(auth, (user) => {
-  loading.style.display = "none";
+// If this device already has a saved name from a previous chat, skip the
+// gate entirely and drop straight into the conversation (same uid = same
+// chat history, since Firebase keeps the anonymous session on this device).
+onAuthStateChanged(auth, async (user) => {
   if (user) currentUser = user;
+
+  const savedName = localStorage.getItem("icews_leadName");
+  if (savedName) {
+    leadName     = savedName;
+    leadBusiness = localStorage.getItem("icews_leadBusiness") || "";
+    const ok = await enterChat();
+    if (!ok) {
+      // Auto-entry failed (e.g. offline) — fall back to showing the gate.
+      gate.style.display = "flex";
+      chatWrap.style.display = "none";
+    }
+  }
+
+  loading.style.display = "none";
 });
 </script>
 </body>
